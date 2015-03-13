@@ -1,0 +1,19 @@
+{
+    "name": "koala-framework/file-watcher",
+    "description": "Library for watching for file system changes",
+    "homepage": "http://www.koala-framework.org/",
+    "license": "BSD-2-Clause",
+    "type": "library",
+    "require": {
+        "symfony/process": "2.6.*",
+        "symfony/event-dispatcher": "2.6.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.5.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Kwf\\FileWatcher": "src/"
+        }
+    }
+}
