@@ -9,9 +9,12 @@ class Watcher
 {
     private $_eventDispatcher;
     private $_backend;
+    private $_paths;
 
     public function __construct($paths, BackendAbstract $backend = null)
     {
+        if (is_string($paths)) $paths = array($paths);
+        $this->_paths = $paths;
         $this->_eventDispatcher = new EventDispatcher();
 
         if (!$backend) {
@@ -27,14 +30,13 @@ class Watcher
 
     public function start()
     {
-        $event = new Event();
-        $event->filename = 'foo';
-        $this->_eventDispatcher->dispatch(Events::MODIFY, $event);
-        //$this->_backend->start();
+        $this->_backend->setPaths($this->_paths);
+        $this->_backend->setEventDispatcher($this->_eventDispatcher);
+        $this->_backend->start();
     }
 
     public function stop()
     {
-        //$this->_backend->stop();
+        $this->_backend->stop();
     }
 }
