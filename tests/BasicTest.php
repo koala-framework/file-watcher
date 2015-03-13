@@ -31,6 +31,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
     public function testIt()
     {
+        sleep(1);
         $f = __DIR__.'/test/foo.txt';
         $php = "sleep(1); file_put_contents('$f', 'x');";
         system("php -r ".escapeshellarg($php)." &> /dev/null &");
