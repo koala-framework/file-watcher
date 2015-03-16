@@ -29,10 +29,6 @@ Install using composer:
 
 ### TODO
 
--  [ ] unit tests for:
-    - [ ] create
-    - [ ] delete
-    - [ ] move
 - [ ] auto create best backend
 - [ ] no output (no echo, no childprocess output (inotify))
 - [ ] error handling when child process fails

@@ -35,10 +35,13 @@ abstract class ChildProcessAbstract extends BackendAbstract
                 }
 
                 $events = $this->_compressEvents($events);
+
                 foreach ($events as $event) {
                     $name = call_user_func(array(get_class($event), 'getEventName'));
                     $this->_eventDispatcher->dispatch($name, $event);
                 }
+
+                $eventsQueue = array();
             }
 
             $event = trim($this->_proc->getIncrementalOutput());
@@ -68,7 +71,7 @@ abstract class ChildProcessAbstract extends BackendAbstract
                 if (($eventsQueue[$k-1] instanceof CreateEvent || $eventsQueue[$k-1] instanceof ModifyEvent)
                     && substr($eventsQueue[$k-1]->filename, 0, strlen($f)) == $f
                 ) {
-                    $eventsQueue[$k] = new ModifyEvent($eventsQueue[$k]->filename);
+                    $eventsQueue[$k] = new CreateEvent($eventsQueue[$k]->filename);
                     unset($eventsQueue[$k-1]);
                 }
             }
