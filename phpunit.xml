@@ -9,6 +9,7 @@
          processIsolation="false"
          stopOnFailure="false"
          syntaxCheck="false"
+         beStrictAboutTestSize="true"
 >
     <testsuites>
         <testsuite name="File Watcher Test Suite">

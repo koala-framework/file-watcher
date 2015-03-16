@@ -29,6 +29,9 @@ class BasicTest extends PHPUnit_Framework_TestCase
         return rmdir($dirname);
     }
 
+    /**
+    * @medium
+    */
     public function testIt()
     {
         sleep(1);
