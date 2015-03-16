@@ -21,8 +21,7 @@ class Inotifywait extends ChildProcessAbstract
     protected function _getCmd()
     {
         $excludeRegEx = array();
-        /*
-        foreach ($exclude as $e) {
+        foreach ($this->_excludePatterns as $e) {
             if (substr($e, -1) == '*') $e = substr($e, 0, -1); //not needed
             $excludeRegEx[] = str_replace(
                 array(
@@ -35,10 +34,9 @@ class Inotifywait extends ChildProcessAbstract
                 ),
                 $e);
         }
-        */
         $excludeRegEx = implode('|', $excludeRegEx);
         $cmd = "inotifywait -e modify -e create -e delete -e move -e moved_to -e moved_from -r --monitor ".
-//             "--exclude '$excludeRegEx' ".
+            "--exclude '$excludeRegEx' ".
             implode(' ', $this->_paths);
         return $cmd;
     }

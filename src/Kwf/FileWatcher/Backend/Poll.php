@@ -38,6 +38,9 @@ class Poll extends BackendAbstract
     {
         $finder = new Finder();
         $finder->files();
+        foreach ($this->_excludePatterns as $excludePattern) {
+            $finder->notName($excludePattern);
+        }
         foreach ($this->_paths as $p) {
             $finder->in($p);
         }

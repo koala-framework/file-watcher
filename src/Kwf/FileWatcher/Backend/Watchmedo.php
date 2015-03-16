@@ -16,11 +16,12 @@ class Watchmedo extends ChildProcessAbstract
 
     protected function _getCmd()
     {
-//             foreach ($exclude as &$e) {
-//                 $e = '*'.$e;
-//             }
+        $exclude = $this->_excludePatterns;
+        foreach ($exclude as &$e) {
+            $e = '*'.$e;
+        }
         $cmd = "watchmedo log --recursive --ignore-directories ".
-            //" --ignore-patterns ".escapeshellarg(implode(';', $exclude)).
+            " --ignore-patterns ".escapeshellarg(implode(';', $exclude)).
             ' '.implode(' ', $this->_paths);
         if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
             //disble output bufferering

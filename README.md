@@ -29,7 +29,6 @@ Install using composer:
 
 ### TODO
 
-- [ ] exclude patterns
 - [ ] error handling when child process fails
 - [ ] new backend: inotify php module implementation
 - [ ] new backend: some nodejs based implementation
