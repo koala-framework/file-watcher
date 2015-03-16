@@ -3,7 +3,7 @@ namespace Kwf\FileWatcher;
 use Kwf\FileWatcher\Events;
 use Kwf\FileWatcher\Event;
 use Kwf\FileWatcher\Backend\BackendAbstract;
-use Kwf\FileWatcher\Backend\Poll as PollBackend;
+use Kwf\FileWatcher\Backend as Backend;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 class Watcher
 {
@@ -18,7 +18,17 @@ class Watcher
         $this->_eventDispatcher = new EventDispatcher();
 
         if (!$backend) {
-            $backend = new PollBackend();
+            $backends = array(
+                new Backend\Inotifywait(),
+                new Backend\Watchmedo(),
+                new Backend\Poll(),
+            );
+            foreach ($backends as $b) {
+                if ($b->isAvailable()) {
+                    $backend = $b;
+                    break;
+                }
+            }
         }
         $this->_backend = $backend;
     }
