@@ -9,3 +9,10 @@ before_script:
 
 script:
     - ./vendor/bin/phpunit
+
+sudo: false
+
+cache:
+  directories:
+    - vendor
+    - $COMPOSER_CACHE_DIR
