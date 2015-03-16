@@ -28,6 +28,11 @@ class Watcher
         return $this->_eventDispatcher->addListener($name, $callback, $priority);
     }
 
+    public function getBackend()
+    {
+        return $this->_backend;
+    }
+
     public function start()
     {
         $this->_backend->setPaths($this->_paths);
