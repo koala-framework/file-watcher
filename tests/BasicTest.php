@@ -58,6 +58,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
     private function _testBackend($backend)
     {
+        if (!$backend->isAvailable()) $this->markTestSkipped();
         sleep(1);
         $f = __DIR__.'/test/foo.txt';
         $php = "<?php sleep(2); file_put_contents('$f', 'x');";

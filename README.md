@@ -33,6 +33,7 @@ Install using composer:
   [ ] create
   [ ] delete
   [ ] move
+[ ] auto create best backend
 [ ] no output (no echo, no childprocess output (inotify))
 [ ] error handling when child process fails
 [ ] new backend: inotify php module implementation
