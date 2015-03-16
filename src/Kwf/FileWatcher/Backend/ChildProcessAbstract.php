@@ -63,6 +63,26 @@ abstract class ChildProcessAbstract extends BackendAbstract
 
     private function _compressEvents($eventsQueue)
     {
+        // compress the following into one event:
+        // CREATE web.scssdx1493.new
+        // MODIFY web.scssdx1493.new
+        // MOVED  web.scssdx1493.new -> web.scss
+        $eventsQueue = array_values($eventsQueue);
+        foreach ($eventsQueue as $k=>$event) {
+            if ($event instanceof MoveEvent && $k >= 2) {
+                $f = $eventsQueue[$k]->destFilename;
+                if ($eventsQueue[$k-1] instanceof ModifyEvent
+                    && $eventsQueue[$k-2] instanceof CreateEvent
+                    && substr($eventsQueue[$k-1]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-2]->filename, 0, strlen($f)) == $f
+                ) {
+                    unset($eventsQueue[$k-1]);
+                    unset($eventsQueue[$k-2]);
+                    $eventsQueue[$k] = new ModifyEvent($f);;
+                }
+            }
+        }
+
         // compress the following into into one event:
         // CREATE web.scssdx1493.new
         // MODIFY web.scssdx1493.new
