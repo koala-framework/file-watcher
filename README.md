@@ -29,12 +29,12 @@ Install using composer:
 
 ### TODO
 
-[ ] unit tests for:
-  [ ] create
-  [ ] delete
-  [ ] move
-[ ] auto create best backend
-[ ] no output (no echo, no childprocess output (inotify))
-[ ] error handling when child process fails
-[ ] new backend: inotify php module implementation
-[ ] new backend: some nodejs based implementation
+-  [ ] unit tests for:
+    - [ ] create
+    - [ ] delete
+    - [ ] move
+- [ ] auto create best backend
+- [ ] no output (no echo, no childprocess output (inotify))
+- [ ] error handling when child process fails
+- [ ] new backend: inotify php module implementation
+- [ ] new backend: some nodejs based implementation
