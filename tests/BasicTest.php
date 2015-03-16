@@ -1,11 +1,11 @@
 <?php
-use Kwf\FileWatcher\Watcher;
 use Kwf\FileWatcher\Event\Modify as ModifyEvent;
 use Kwf\FileWatcher\Event\Create as CreateEvent;
 use Kwf\FileWatcher\Event\Delete as DeleteEvent;
 use Kwf\FileWatcher\Backend\Poll as PollBackend;
 use Kwf\FileWatcher\Backend\Watchmedo as WatchmedoBackend;
 use Kwf\FileWatcher\Backend\Inotifywait as InotifywaitBackend;
+
 use Symfony\Component\Process\PhpProcess;
 
 class BasicTest extends PHPUnit_Framework_TestCase
@@ -37,9 +37,9 @@ class BasicTest extends PHPUnit_Framework_TestCase
     public function backends()
     {
         return array(
-            array(new PollBackend()),
-            array(new WatchmedoBackend()),
-            array(new InotifywaitBackend()),
+            array(new PollBackend(array())),
+            array(new WatchmedoBackend(array())),
+            array(new InotifywaitBackend(array())),
         );
     }
 
@@ -57,12 +57,12 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $process->start();
 
         $gotEvents = array();
-        $watcher = new Watcher(__DIR__.'/test', $backend);
-        $watcher->addListener(ModifyEvent::NAME, function(ModifyEvent $e) use (&$gotEvents, $watcher) {
+        $backend->setPath(__DIR__.'/test');
+        $backend->addListener(ModifyEvent::NAME, function(ModifyEvent $e) use (&$gotEvents, $backend) {
             $gotEvents[] = $e->filename;
-            $watcher->stop();
+            $backend->stop();
         });
-        $watcher->start();
+        $backend->start();
         $this->assertEquals($gotEvents, array(__DIR__.'/test/foo.txt'));
     }
 
@@ -80,12 +80,12 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $process->start();
 
         $gotEvents = array();
-        $watcher = new Watcher(__DIR__.'/test', $backend);
-        $watcher->addListener(CreateEvent::NAME, function(CreateEvent $e) use (&$gotEvents, $watcher) {
+        $backend->setPath(__DIR__.'/test');
+        $backend->addListener(CreateEvent::NAME, function(CreateEvent $e) use (&$gotEvents, $backend) {
             $gotEvents[] = $e->filename;
-            $watcher->stop();
+            $backend->stop();
         });
-        $watcher->start();
+        $backend->start();
         $this->assertEquals($gotEvents, array(__DIR__.'/test/foo2.txt'));
     }
 
@@ -103,12 +103,12 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $process->start();
 
         $gotEvents = array();
-        $watcher = new Watcher(__DIR__.'/test', $backend);
-        $watcher->addListener(DeleteEvent::NAME, function(DeleteEvent $e) use (&$gotEvents, $watcher) {
+        $backend->setPath(__DIR__.'/test');
+        $backend->addListener(DeleteEvent::NAME, function(DeleteEvent $e) use (&$gotEvents, $backend) {
             $gotEvents[] = $e->filename;
-            $watcher->stop();
+            $backend->stop();
         });
-        $watcher->start();
+        $backend->start();
         $this->assertEquals($gotEvents, array(__DIR__.'/test/foo.txt'));
     }
 }

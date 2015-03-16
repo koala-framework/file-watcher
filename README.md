@@ -21,7 +21,7 @@ Install using composer:
 
 ### Example Usage
 
-    $watcher = new Kwf\FileWatcher\Watcher('.');
+    $watcher = Kwf\FileWatcher\Watcher::create('.');
     $watcher->addListener(Kwf\FileWatcher\Events::MODIFY, function($e) {
         var_dump($e->filename);
     });
