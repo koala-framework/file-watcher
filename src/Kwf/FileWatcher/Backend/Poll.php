@@ -1,7 +1,9 @@
 <?php
 namespace Kwf\FileWatcher\Backend;
-use Kwf\FileWatcher\Events;
-use Kwf\FileWatcher\Event;
+use Kwf\FileWatcher\Event\Delete as DeleteEvent;
+use Kwf\FileWatcher\Event\Create as CreateEvent;
+use Kwf\FileWatcher\Event\Modify as ModifyEvent;
+use Kwf\FileWatcher\Event\Move as MoveEvent;
 use Symfony\Component\Finder\Finder;
 class Poll extends BackendAbstract
 {
@@ -17,26 +19,19 @@ class Poll extends BackendAbstract
             $files = $this->_findFiles();
             foreach ($files as $file=>$mtime) {
                 if (!isset($this->_files[$file])) {
-                    $this->_dispatchNewEvent(Events::CREATE, $file);
+                    $this->_eventDispatcher->dispatch(CreateEvent::NAME, new CreateEvent($file));
                 } elseif ($this->_files[$file] != $mtime) {
                     $this->_files[$file] = $mtime;
-                    $this->_dispatchNewEvent(Events::MODIFY, $file);
+                    $this->_eventDispatcher->dispatch(ModifyEvent::NAME, new ModifyEvent($file));
                 }
             }
             foreach ($this->_files as $file=>$mtime) {
                 if (!isset($files[$file])) {
                     unset($this->_files[$file]);
-                    $this->_dispatchNewEvent(Events::DELETE, $file);
+                    $this->_eventDispatcher->dispatch(DeleteEvent::NAME, new DeleteEvent($file));
                 }
             }
         }
-    }
-
-    private function _dispatchNewEvent($eventName, $filename)
-    {
-        $event = new Event();
-        $event->filename = $filename;
-        $this->_eventDispatcher->dispatch($eventName, $event);
     }
 
     private function _findFiles()
@@ -56,5 +51,10 @@ class Poll extends BackendAbstract
     public function stop()
     {
         $this->_stopped = true;
+    }
+
+    public function isAvailable()
+    {
+        return true;
     }
 }

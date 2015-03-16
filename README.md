@@ -26,3 +26,14 @@ Install using composer:
         var_dump($e->filename);
     });
     $watcher->start();
+
+### TODO
+
+[ ] unit tests for:
+  [ ] create
+  [ ] delete
+  [ ] move
+[ ] no output (no echo, no childprocess output (inotify))
+[ ] error handling when child process fails
+[ ] new backend: inotify php module implementation
+[ ] new backend: some nodejs based implementation

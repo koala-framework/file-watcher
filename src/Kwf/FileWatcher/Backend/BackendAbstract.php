@@ -18,4 +18,5 @@ abstract class BackendAbstract
 
     abstract function start();
     abstract function stop();
+    abstract public function isAvailable();
 }
