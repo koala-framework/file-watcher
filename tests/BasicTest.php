@@ -3,6 +3,8 @@ use Kwf\FileWatcher\Watcher;
 use Kwf\FileWatcher\Events;
 use Kwf\FileWatcher\Event;
 use Kwf\FileWatcher\Backend\Poll as PollBackend;
+use Symfony\Component\Process\Process;
+
 class BasicTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
@@ -36,8 +38,10 @@ class BasicTest extends PHPUnit_Framework_TestCase
     {
         sleep(1);
         $f = __DIR__.'/test/foo.txt';
-        $php = "sleep(1); file_put_contents('$f', 'x');";
-        system("php -r ".escapeshellarg($php)." &> /dev/null &");
+        $php = "sleep(2); file_put_contents('$f', 'x');";
+        $cmd = "php -r ".escapeshellarg($php)."";
+        $process = new Process($cmd);
+        $process->start();
 
         $gotEvents = array();
         $watcher = new Watcher(__DIR__.'/test', new PollBackend());
