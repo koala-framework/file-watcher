@@ -16,7 +16,7 @@ abstract class ChildProcessAbstract extends BackendAbstract
     public function start()
     {
         $cmd = $this->_getCmd();
-        $this->_logger->info("$cmd");
+        $this->_logger->debug("$cmd");
         $this->_proc = new Process($cmd, null, null, null, null, array());
         $this->_proc->start();
 
@@ -46,7 +46,8 @@ abstract class ChildProcessAbstract extends BackendAbstract
             }
 
             $event = trim($this->_proc->getIncrementalOutput());
-            $this->_logger->notice($this->_proc->getIncrementalErrorOutput());
+            $errOut = $this->_proc->getIncrementalErrorOutput();
+            if ($errOut) $this->_logger->notice(rtrim($errOut));;
 
             if (!$event) {
                 usleep($bufferUsecs/2);
@@ -56,7 +57,8 @@ abstract class ChildProcessAbstract extends BackendAbstract
 
             $lastChange = microtime(true);
         }
-        $this->_logger->notice($this->_proc->getIncrementalErrorOutput());
+        $errOut = $this->_proc->getIncrementalErrorOutput();
+        if ($errOut) $this->_logger->notice(rtrim($errOut));;
     }
 
     private function _compressEvents($eventsQueue)
