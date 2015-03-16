@@ -46,8 +46,8 @@ class Inotifywait extends ChildProcessAbstract
     protected function _getEventFromLine($line)
     {
         if (!preg_match('#^([^ ]+) ([A-Z,_]+) ([^ ]+)$#', trim($line), $m)) {
-            echo "unknown event: $line\n";
-            continue;
+            $this->_logger->error("unknown event: $line");
+            return null;
         }
         $ev = $m[2];
         $file = $m[1].$m[3];

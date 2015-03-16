@@ -36,7 +36,7 @@ class Watchmedo extends ChildProcessAbstract
     protected function _getEventFromLine($line)
     {
         if (!preg_match('#^on_([a-z]+)\(.*event=.*src_path=u?\'([^\']+)\'(, dest_path=u?\'([^\']+)\')?#', trim($line), $m)) {
-            echo "unknown event: $line\n";
+            $this->_logger->error("unknown event: $line");
             continue;
         }
         $ev = $m[1];

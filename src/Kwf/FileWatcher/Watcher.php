@@ -5,6 +5,7 @@ use Kwf\FileWatcher\Event;
 use Kwf\FileWatcher\Backend\BackendAbstract;
 use Kwf\FileWatcher\Backend as Backend;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Psr\Log;
 class Watcher
 {
     private $_eventDispatcher;
@@ -41,6 +42,11 @@ class Watcher
     public function getBackend()
     {
         return $this->_backend;
+    }
+
+    public function setLogger(Log\LoggerInterface $logger)
+    {
+        $this->_backend->setLogger($logger);
     }
 
     public function start()

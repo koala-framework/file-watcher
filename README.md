@@ -29,7 +29,7 @@ Install using composer:
 
 ### TODO
 
-- [ ] no output (no echo, no childprocess output (inotify))
+- [ ] exclude patterns
 - [ ] error handling when child process fails
 - [ ] new backend: inotify php module implementation
 - [ ] new backend: some nodejs based implementation
