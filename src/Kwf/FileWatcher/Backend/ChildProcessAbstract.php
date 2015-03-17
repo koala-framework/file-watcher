@@ -38,7 +38,7 @@ abstract class ChildProcessAbstract extends BackendAbstract
 
                 $events = $this->_compressEvents($events);
                 if ($this->_queueSizeLimit && count($events) > $this->_queueSizeLimit) {
-                    $this->_eventDispatcher->dispatch(QueueFullEvent::NAME, new QueueFullEvent());
+                    $this->_eventDispatcher->dispatch(QueueFullEvent::NAME, new QueueFullEvent($events));
                     $events = array();
                 }
 
