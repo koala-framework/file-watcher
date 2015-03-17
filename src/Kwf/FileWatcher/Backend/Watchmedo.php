@@ -20,9 +20,9 @@ class Watchmedo extends ChildProcessAbstract
         foreach ($exclude as &$e) {
             $e = '*'.$e;
         }
-        $cmd = "watchmedo log --recursive --ignore-directories ".
-            " --ignore-patterns ".escapeshellarg(implode(';', $exclude)).
-            ' '.implode(' ', $this->_paths);
+        $cmd = "watchmedo log --recursive --ignore-directories ";
+        if ($exclude) $cmd .= "--ignore-patterns ".escapeshellarg(implode(';', $exclude)).' ';
+        $cmd .= implode(' ', $this->_paths);
         if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
             //disble output bufferering
             $cmd = "PYTHONUNBUFFERED=1 $cmd";

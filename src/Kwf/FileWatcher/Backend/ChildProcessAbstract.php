@@ -4,6 +4,7 @@ use Kwf\FileWatcher\Event\Delete as DeleteEvent;
 use Kwf\FileWatcher\Event\Create as CreateEvent;
 use Kwf\FileWatcher\Event\Modify as ModifyEvent;
 use Kwf\FileWatcher\Event\Move as MoveEvent;
+use Kwf\FileWatcher\Event\QueueFull as QueueFullEvent;
 use Symfony\Component\Process\Process;
 
 abstract class ChildProcessAbstract extends BackendAbstract
@@ -36,6 +37,10 @@ abstract class ChildProcessAbstract extends BackendAbstract
                 }
 
                 $events = $this->_compressEvents($events);
+                if ($this->_queueSizeLimit && count($events) > $this->_queueSizeLimit) {
+                    $this->_eventDispatcher->dispatch(QueueFullEvent::NAME, new QueueFullEvent());
+                    $events = array();
+                }
 
                 foreach ($events as $event) {
                     $name = call_user_func(array(get_class($event), 'getEventName'));

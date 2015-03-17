@@ -8,6 +8,7 @@ abstract class BackendAbstract
     protected $_excludePatterns = array();
     protected $_eventDispatcher;
     protected $_logger;
+    protected $_queueSizeLimit = false;
 
     public function __construct($paths)
     {
@@ -21,6 +22,7 @@ abstract class BackendAbstract
     public function setEventDispatcher($v)
     {
         $this->_eventDispatcher = $v;
+        return $this;
     }
 
     public function getEventDispatcher()
@@ -37,26 +39,37 @@ abstract class BackendAbstract
     public function setLogger(Log\LoggerInterface $logger)
     {
         $this->_logger = $logger;
+        return $this;
     }
 
     public function setPaths($v)
     {
         $this->_paths = $v;
+        return $this;
     }
 
     public function setPath($path)
     {
         $this->_paths = array((string)$path);
+        return $this;
     }
 
     public function addPath($path)
     {
         $this->_paths[] = $path;
+        return $this;
     }
 
     public function setExcludePatterns(array $excludePatterns)
     {
         $this->_excludePatterns = $excludePatterns;
+        return $this;
+    }
+
+    public function setQueueSizeLimit($limit)
+    {
+        $this->_queueSizeLimit = $limit;
+        return $this;
     }
 
     abstract function start();

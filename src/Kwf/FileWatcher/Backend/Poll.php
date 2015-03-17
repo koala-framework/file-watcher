@@ -4,7 +4,9 @@ use Kwf\FileWatcher\Event\Delete as DeleteEvent;
 use Kwf\FileWatcher\Event\Create as CreateEvent;
 use Kwf\FileWatcher\Event\Modify as ModifyEvent;
 use Kwf\FileWatcher\Event\Move as MoveEvent;
+use Kwf\FileWatcher\Event\QueueFull as QueueFullEvent;
 use Symfony\Component\Finder\Finder;
+
 class Poll extends BackendAbstract
 {
     private $_stopped = false;
@@ -17,19 +19,30 @@ class Poll extends BackendAbstract
         while (!$this->_stopped) {
             sleep(1);
             $files = $this->_findFiles();
+            $events = array();
             foreach ($files as $file=>$mtime) {
                 if (!isset($this->_files[$file])) {
-                    $this->_eventDispatcher->dispatch(CreateEvent::NAME, new CreateEvent($file));
+                    $events[] = new CreateEvent($file);
                 } elseif ($this->_files[$file] != $mtime) {
                     $this->_files[$file] = $mtime;
-                    $this->_eventDispatcher->dispatch(ModifyEvent::NAME, new ModifyEvent($file));
+                    $events[] = new ModifyEvent($file);
                 }
             }
             foreach ($this->_files as $file=>$mtime) {
                 if (!isset($files[$file])) {
                     unset($this->_files[$file]);
-                    $this->_eventDispatcher->dispatch(DeleteEvent::NAME, new DeleteEvent($file));
+                    $events[] = new DeleteEvent($file);
                 }
+            }
+
+            if ($this->_queueSizeLimit && count($events) > $this->_queueSizeLimit) {
+                $this->_eventDispatcher->dispatch(QueueFullEvent::NAME, new QueueFullEvent());
+                $events = array();
+            }
+
+            foreach ($events as $event) {
+                $name = call_user_func(array(get_class($event), 'getEventName'));
+                $this->_eventDispatcher->dispatch($name, $event);
             }
         }
     }

@@ -29,6 +29,7 @@ Install using composer:
 
 ### TODO
 
+- [ ] more events compressing
 - [ ] error handling when child process fails
 - [ ] new backend: inotify php module implementation
 - [ ] new backend: some nodejs based implementation

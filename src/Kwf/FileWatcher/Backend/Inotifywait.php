@@ -35,9 +35,9 @@ class Inotifywait extends ChildProcessAbstract
                 $e);
         }
         $excludeRegEx = implode('|', $excludeRegEx);
-        $cmd = "inotifywait -e modify -e create -e delete -e move -e moved_to -e moved_from -r --monitor ".
-            "--exclude '$excludeRegEx' ".
-            implode(' ', $this->_paths);
+        $cmd = "inotifywait -e modify -e create -e delete -e move -e moved_to -e moved_from -r --monitor ";
+        if ($excludeRegEx) $cmd .= "--exclude '$excludeRegEx' ";
+        $cmd .= implode(' ', $this->_paths);
         return $cmd;
     }
 

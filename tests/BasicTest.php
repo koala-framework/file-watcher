@@ -2,6 +2,7 @@
 use Kwf\FileWatcher\Event\Modify as ModifyEvent;
 use Kwf\FileWatcher\Event\Create as CreateEvent;
 use Kwf\FileWatcher\Event\Delete as DeleteEvent;
+use Kwf\FileWatcher\Event\QueueFull as QueueFullEvent;
 use Kwf\FileWatcher\Backend\Poll as PollBackend;
 use Kwf\FileWatcher\Backend\Watchmedo as WatchmedoBackend;
 use Kwf\FileWatcher\Backend\Inotifywait as InotifywaitBackend;
@@ -63,6 +64,10 @@ class BasicTest extends PHPUnit_Framework_TestCase
             $backend->stop();
         });
         $backend->start();
+
+        $process->wait();
+        $this->assertTrue($process->isSuccessful());
+
         $this->assertEquals($gotEvents, array(__DIR__.'/test/foo.txt'));
     }
 
@@ -86,6 +91,10 @@ class BasicTest extends PHPUnit_Framework_TestCase
             $backend->stop();
         });
         $backend->start();
+
+        $process->wait();
+        $this->assertTrue($process->isSuccessful());
+
         $this->assertEquals($gotEvents, array(__DIR__.'/test/foo2.txt'));
     }
 
@@ -109,6 +118,38 @@ class BasicTest extends PHPUnit_Framework_TestCase
             $backend->stop();
         });
         $backend->start();
+
+        $process->wait();
+        $this->assertTrue($process->isSuccessful());
+
         $this->assertEquals($gotEvents, array(__DIR__.'/test/foo.txt'));
+    }
+
+    /**
+    * @medium
+    * @dataProvider backends
+    */
+    public function testQueueFull($backend)
+    {
+        if (!$backend->isAvailable()) $this->markTestSkipped();
+        sleep(1);
+        $f = __DIR__.'/test/';
+        $php = "<?php sleep(2); for (\$i=0;\$i<100;\$i++) { file_put_contents('{$f}test'.\$i.'.txt', 'x'); }";
+        $process = new PhpProcess($php);
+        $process->start();
+
+        $gotEvents = array();
+        $backend->setPath(__DIR__.'/test');
+        $backend->setQueueSizeLimit(80);
+        $backend->addListener(QueueFullEvent::NAME, function(QueueFullEvent $e) use (&$gotEvents, $backend) {
+            $gotEvents[] = $e;
+            $backend->stop();
+        });
+        $backend->start();
+
+        $process->wait();
+        $this->assertTrue($process->isSuccessful());
+
+        $this->assertEquals(count($gotEvents), 1);
     }
 }
