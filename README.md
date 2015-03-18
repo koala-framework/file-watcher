@@ -8,6 +8,7 @@ Supports different backends for best cross platform usage.
 
 * [watchmedo](https://pythonhosted.org/watchdog/) (Cross platform pything shell utility)
 * [inotifywait](http://linux.die.net/man/1/inotifywait) (Linux shell utility)
+* [inotify](http://php.net/manual/en/book.inotify.php) (Php PECL extension)
 * Polling fallback (Slow)
 
 ### Requirements
@@ -29,7 +30,5 @@ Install using composer:
 
 ### TODO
 
-- [ ] more events compressing
 - [ ] error handling when child process fails
-- [ ] new backend: inotify php module implementation
 - [ ] new backend: some nodejs based implementation

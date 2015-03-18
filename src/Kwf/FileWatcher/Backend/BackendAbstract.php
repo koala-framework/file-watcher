@@ -1,7 +1,14 @@
 <?php
 namespace Kwf\FileWatcher\Backend;
+use Kwf\FileWatcher\Event\Delete as DeleteEvent;
+use Kwf\FileWatcher\Event\Create as CreateEvent;
+use Kwf\FileWatcher\Event\Modify as ModifyEvent;
+use Kwf\FileWatcher\Event\Move as MoveEvent;
+use Kwf\FileWatcher\Event\QueueFull as QueueFullEvent;
+
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Psr\Log;
+
 abstract class BackendAbstract
 {
     protected $_paths;
@@ -83,6 +90,103 @@ abstract class BackendAbstract
     {
         $this->_logger->info("$name: ".(isset($e->filename) ? $e->filename : ''));
         $this->_eventDispatcher->dispatch($name, $e);
+    }
+
+    protected function _compressEvents($eventsQueue)
+    {
+        // compress multiple MODIFY events into one:
+        // (happens eg. when creating new file (CREATE, ATTRIB, MODIFY)
+        $eventsQueue = array_values($eventsQueue);
+        foreach ($eventsQueue as $k=>$event) {
+            if ($event instanceof ModifyEvent && $k >= 1) {
+                if ($eventsQueue[$k-1] instanceof ModifyEvent && $event->filename == $eventsQueue[$k-1]->filename) {
+                    unset($eventsQueue[$k-1]);
+                }
+            }
+        }
+
+        // compress the following into one event:
+        // CREATE web.scssdx1493.new
+        // MODIFY web.scssdx1493.new
+        // MOVED  web.scssdx1493.new -> web.scss
+        $eventsQueue = array_values($eventsQueue);
+        foreach ($eventsQueue as $k=>$event) {
+            if ($event instanceof MoveEvent && $k >= 2) {
+                $f = $eventsQueue[$k]->destFilename;
+
+                if ($eventsQueue[$k-1] instanceof ModifyEvent
+                    && $eventsQueue[$k-2] instanceof CreateEvent
+                    && substr($eventsQueue[$k-1]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-2]->filename, 0, strlen($f)) == $f
+                ) {
+                    unset($eventsQueue[$k-1]);
+                    unset($eventsQueue[$k-2]);
+                    $eventsQueue[$k] = new ModifyEvent($f);
+                }
+            }
+        }
+
+        // compress the following into into one event:
+        // CREATE web.scssdx1493.new
+        // MODIFY web.scssdx1493.new
+        // (or in other order, which can happen
+        $eventsQueue = array_values($eventsQueue);
+        foreach ($eventsQueue as $k=>$event) {
+            if (($event instanceof ModifyEvent || $event instanceof CreateEvent) && $k >= 1) {
+                $f = $eventsQueue[$k]->filename;
+                if (($eventsQueue[$k-1] instanceof CreateEvent || $eventsQueue[$k-1] instanceof ModifyEvent)
+                    && substr($eventsQueue[$k-1]->filename, 0, strlen($f)) == $f
+                ) {
+                    $eventsQueue[$k] = new CreateEvent($eventsQueue[$k]->filename);
+                    unset($eventsQueue[$k-1]);
+                }
+            }
+        }
+
+        // compress the following into into one event:
+        // CREATE web.scssdx1493.new
+        // MOVED web.scssdx1493.new web.scss
+        $eventsQueue = array_values($eventsQueue);
+        foreach ($eventsQueue as $k=>$event) {
+            if ($event instanceof MoveEvent && $k >= 1) {
+                $f = $eventsQueue[$k]->destFilename;
+                if ($eventsQueue[$k-1] instanceof CreateEvent
+                    && substr($eventsQueue[$k]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-1]->filename, 0, strlen($f)) == $f
+                ) {
+                    unset($eventsQueue[$k-1]);
+                    $eventsQueue[$k] = new ModifyEvent($f);
+                }
+            }
+        }
+
+        $eventsQueue = array_values($eventsQueue);
+        // CREATE Controller.php___jb_bak___
+        // MOVED Controller.php Controller.php___jb_old___
+        // MOVED Controller.php___jb_bak___ Controller.php
+        // MODIFY Controller.php
+        // DELETE Controller.php___jb_old___
+        foreach ($eventsQueue as $k=>$event) {
+            if ($event instanceof DeleteEvent && $k >= 4 && $eventsQueue[$k-1] instanceof ModifyEvent) {
+                $f = $eventsQueue[$k-1]->filename;
+                if ($eventsQueue[$k-2] instanceof MoveEvent
+                    && $eventsQueue[$k-3] instanceof MoveEvent
+                    && $eventsQueue[$k-4] instanceof CreateEvent
+                    && substr($eventsQueue[$k]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-2]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-3]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-4]->filename, 0, strlen($f)) == $f
+                ) {
+                    unset($eventsQueue[$k-1]);
+                    unset($eventsQueue[$k-2]);
+                    unset($eventsQueue[$k-3]);
+                    unset($eventsQueue[$k-4]);
+                    $eventsQueue[$k] = new ModifyEvent($f);
+                }
+            }
+        }
+
+        return $eventsQueue;
     }
 
     abstract function start();

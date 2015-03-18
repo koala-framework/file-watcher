@@ -7,6 +7,7 @@ use Kwf\FileWatcher\Event\QueueFull as QueueFullEvent;
 use Kwf\FileWatcher\Backend\Poll as PollBackend;
 use Kwf\FileWatcher\Backend\Watchmedo as WatchmedoBackend;
 use Kwf\FileWatcher\Backend\Inotifywait as InotifywaitBackend;
+use Kwf\FileWatcher\Backend\Inotify as InotifyBackend;
 
 use Symfony\Component\Process\PhpProcess;
 use Symfony\Component\Filesystem\Filesystem;
@@ -38,6 +39,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
             array(new PollBackend(array())),
             array(new WatchmedoBackend(array())),
             array(new InotifywaitBackend(array())),
+            array(new InotifyBackend(array())),
         );
     }
 
@@ -45,7 +47,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
     * @medium
     * @dataProvider backends
     */
-    public function testModify($backend)
+    public function testModifyContents($backend)
     {
         if (!$backend->isAvailable()) $this->markTestSkipped();
         sleep(1);
