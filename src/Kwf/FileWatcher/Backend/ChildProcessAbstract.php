@@ -68,6 +68,17 @@ abstract class ChildProcessAbstract extends BackendAbstract
 
     private function _compressEvents($eventsQueue)
     {
+        // compress multiple MODIFY events into one:
+        // (happens eg. when creating new file (CREATE, ATTRIB, MODIFY)
+        $eventsQueue = array_values($eventsQueue);
+        foreach ($eventsQueue as $k=>$event) {
+            if ($event instanceof ModifyEvent && $k >= 1) {
+                if ($eventsQueue[$k]->filename == $eventsQueue[$k-1]->filename) {
+                    unset($eventsQueue[$k-1]);
+                }
+            }
+        }
+
         // compress the following into one event:
         // CREATE web.scssdx1493.new
         // MODIFY web.scssdx1493.new
@@ -106,13 +117,13 @@ abstract class ChildProcessAbstract extends BackendAbstract
         }
 
         // compress the following into into one event:
-        // MODIFY web.scssdx1493.new
+        // CREATE web.scssdx1493.new
         // MOVED web.scssdx1493.new web.scss
         $eventsQueue = array_values($eventsQueue);
         foreach ($eventsQueue as $k=>$event) {
             if ($event instanceof MoveEvent && $k >= 1) {
                 $f = $eventsQueue[$k]->destFilename;
-                if ($eventsQueue[$k-1] instanceof ModifyEvent
+                if ($eventsQueue[$k-1] instanceof CreateEvent
                     && substr($eventsQueue[$k]->filename, 0, strlen($f)) == $f
                     && substr($eventsQueue[$k-1]->filename, 0, strlen($f)) == $f
                 ) {
