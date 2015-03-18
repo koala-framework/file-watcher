@@ -2,6 +2,7 @@
 use Kwf\FileWatcher\Event\Modify as ModifyEvent;
 use Kwf\FileWatcher\Event\Create as CreateEvent;
 use Kwf\FileWatcher\Event\Delete as DeleteEvent;
+use Kwf\FileWatcher\Event\Move as MoveEvent;
 use Kwf\FileWatcher\Event\QueueFull as QueueFullEvent;
 use Kwf\FileWatcher\Backend\Poll as PollBackend;
 use Kwf\FileWatcher\Backend\Watchmedo as WatchmedoBackend;
@@ -209,5 +210,111 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($process->isSuccessful());
 
         $this->assertEquals($gotEvents, array(__DIR__.'/test2/bar.txt'));
+    }
+
+    /**
+    * @medium
+    * @dataProvider backends
+    */
+    public function testCompressEventsJetbrains($backend)
+    {
+        // CREATE Controller.php___jb_bak___
+        // MODIFY Controller.php___jb_bak___
+        // MOVED_FROM Controller.php
+        // MOVED_TO Controller.php___jb_old___
+        // MOVED_FROM Controller.php___jb_bak___
+        // MOVED_TO Controller.php
+        // ATTRIB Controller.php
+        // DELETE Controller.php___jb_old___
+
+        if (!$backend->isAvailable()) $this->markTestSkipped();
+        $f = __DIR__.'/test/';
+        sleep(1);
+        $php = "<?php sleep(2);
+        file_put_contents('{$f}foo.txt___jb_bak___', 'x');
+        rename('{$f}foo.txt', '{$f}foo.txt___jb_old___');
+        rename('{$f}foo.txt___jb_bak___', '{$f}foo.txt');
+        chmod('{$f}foo.txt', 0644);
+        unlink('{$f}foo.txt___jb_old___');
+
+        file_put_contents('{$f}stop.txt', 'x');
+        ";
+        $process = new PhpProcess($php);
+        $process->start();
+
+        $gotEvents = array();
+        $backend->setPath(__DIR__.'/test');
+        $backend->addListener(CreateEvent::NAME, function($e) use (&$gotEvents, $backend) {
+            if ($e->filename == __DIR__.'/test/stop.txt') {
+                $backend->stop();
+            } else {
+                $gotEvents[] = 'create';
+            }
+        });
+        $backend->addListener(ModifyEvent::NAME, function($e) use (&$gotEvents, $backend) {
+            $gotEvents[] = 'modify';
+        });
+        $backend->addListener(DeleteEvent::NAME, function($e) use (&$gotEvents, $backend) {
+            $gotEvents[] = 'delete';
+        });
+        $backend->addListener(MoveEvent::NAME, function($e) use (&$gotEvents, $backend) {
+            $gotEvents[] = 'move';
+        });
+        $backend->start();
+
+        $process->wait();
+        $this->assertTrue($process->isSuccessful());
+
+        $this->assertEquals($gotEvents, array('modify'));
+    }
+
+    /**
+    * @medium
+    * @dataProvider backends
+    */
+    public function testCompressEventsKate($backend)
+    {
+        // CREATE web.scssdx1493.new
+        // MODIFY web.scssdx1493.new
+        // MOVED_FROM web.scssdx1493.new
+        // MOVED_TO web.scss
+
+        if (!$backend->isAvailable()) $this->markTestSkipped();
+        $f = __DIR__.'/test/';
+        sleep(1);
+        $php = "<?php sleep(2);
+        file_put_contents('{$f}foo.txtdx1493.new', 'x');
+        rename('{$f}foo.txtdx1493.new', '{$f}foo.txt');
+
+        file_put_contents('{$f}stop.txt', 'x');
+        ";
+        $process = new PhpProcess($php);
+        $process->start();
+
+        $gotEvents = array();
+        $backend->setPath(__DIR__.'/test');
+        $backend->addListener(ModifyEvent::NAME, function($e) use (&$gotEvents, $backend) {
+            $gotEvents[] = 'modify';
+        });
+        $backend->addListener(CreateEvent::NAME, function($e) use (&$gotEvents, $backend) {
+            if ($e->filename == __DIR__.'/test/stop.txt') {
+                $backend->stop();
+            } else {
+                $gotEvents[] = 'create';
+            }
+        });
+        $backend->addListener(DeleteEvent::NAME, function($e) use (&$gotEvents, $backend) {
+            $gotEvents[] = 'delete';
+        });
+        $backend->addListener(MoveEvent::NAME, function($e) use (&$gotEvents, $backend) {
+            $gotEvents[] = 'move';
+        });
+
+        $backend->start();
+
+        $process->wait();
+        $this->assertTrue($process->isSuccessful());
+
+        $this->assertEquals($gotEvents, array('modify'));
     }
 }

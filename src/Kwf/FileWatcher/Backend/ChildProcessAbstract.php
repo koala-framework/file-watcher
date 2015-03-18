@@ -134,6 +134,34 @@ abstract class ChildProcessAbstract extends BackendAbstract
                 }
             }
         }
+
+        $eventsQueue = array_values($eventsQueue);
+        // CREATE Controller.php___jb_bak___
+        // MOVED Controller.php Controller.php___jb_old___
+        // MOVED Controller.php___jb_bak___ Controller.php
+        // MODIFY Controller.php
+        // DELETE Controller.php___jb_old___
+        foreach ($eventsQueue as $k=>$event) {
+            if ($event instanceof DeleteEvent && $k >= 4 && $eventsQueue[$k-1] instanceof ModifyEvent) {
+                $f = $eventsQueue[$k-1]->filename;
+                var_dump($f);
+                if ($eventsQueue[$k-2] instanceof MoveEvent
+                    && $eventsQueue[$k-3] instanceof MoveEvent
+                    && $eventsQueue[$k-4] instanceof CreateEvent
+                    && substr($eventsQueue[$k]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-2]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-3]->filename, 0, strlen($f)) == $f
+                    && substr($eventsQueue[$k-4]->filename, 0, strlen($f)) == $f
+                ) {
+                    unset($eventsQueue[$k-1]);
+                    unset($eventsQueue[$k-2]);
+                    unset($eventsQueue[$k-3]);
+                    unset($eventsQueue[$k-4]);
+                    $eventsQueue[$k] = new ModifyEvent($f);
+                }
+            }
+        }
+
         return $eventsQueue;
     }
 
