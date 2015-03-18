@@ -31,6 +31,7 @@ abstract class ChildProcessAbstract extends BackendAbstract
                 $events = array();
 
                 foreach ($eventsQueue as $k=>$line) {
+                    $this->_logger->debug($line);
                     $e = $this->_getEventFromLine($line);
                     if ($e) {
                         $events[] = $e;
@@ -39,13 +40,13 @@ abstract class ChildProcessAbstract extends BackendAbstract
 
                 $events = $this->_compressEvents($events);
                 if ($this->_queueSizeLimit && count($events) > $this->_queueSizeLimit) {
-                    $this->_eventDispatcher->dispatch(QueueFullEvent::NAME, new QueueFullEvent($events));
+                    $this->_dispatchEvent(QueueFullEvent::NAME, new QueueFullEvent($events));
                     $events = array();
                 }
 
                 foreach ($events as $event) {
                     $name = call_user_func(array(get_class($event), 'getEventName'));
-                    $this->_eventDispatcher->dispatch($name, $event);
+                    $this->_dispatchEvent($name, $event);
                 }
 
                 $eventsQueue = array();
@@ -95,7 +96,7 @@ abstract class ChildProcessAbstract extends BackendAbstract
                 ) {
                     unset($eventsQueue[$k-1]);
                     unset($eventsQueue[$k-2]);
-                    $eventsQueue[$k] = new ModifyEvent($f);;
+                    $eventsQueue[$k] = new ModifyEvent($f);
                 }
             }
         }

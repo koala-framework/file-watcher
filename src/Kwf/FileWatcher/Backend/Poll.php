@@ -36,13 +36,13 @@ class Poll extends BackendAbstract
             }
 
             if ($this->_queueSizeLimit && count($events) > $this->_queueSizeLimit) {
-                $this->_eventDispatcher->dispatch(QueueFullEvent::NAME, new QueueFullEvent($events));
+                $this->_dispatchEvent(QueueFullEvent::NAME, new QueueFullEvent($events));
                 $events = array();
             }
 
             foreach ($events as $event) {
                 $name = call_user_func(array(get_class($event), 'getEventName'));
-                $this->_eventDispatcher->dispatch($name, $event);
+                $this->_dispatchEvent($name, $event);
             }
         }
     }

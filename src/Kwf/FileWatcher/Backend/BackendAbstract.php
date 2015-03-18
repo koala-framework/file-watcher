@@ -79,6 +79,12 @@ abstract class BackendAbstract
         return $this;
     }
 
+    protected function _dispatchEvent($name, $e)
+    {
+        $this->_logger->info("$name: ".(isset($e->filename) ? $e->filename : ''));
+        $this->_eventDispatcher->dispatch($name, $e);
+    }
+
     abstract function start();
     abstract function stop();
     abstract public function isAvailable();
