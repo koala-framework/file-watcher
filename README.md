@@ -29,7 +29,6 @@ Install using composer:
 
 ### TODO
 
-- [ ] follow symlinks (optionally)
 - [ ] more events compressing
 - [ ] error handling when child process fails
 - [ ] new backend: inotify php module implementation

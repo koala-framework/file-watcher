@@ -9,6 +9,7 @@ abstract class BackendAbstract
     protected $_eventDispatcher;
     protected $_logger;
     protected $_queueSizeLimit = false;
+    protected $_followLinks = false;
 
     public function __construct($paths)
     {
@@ -69,6 +70,12 @@ abstract class BackendAbstract
     public function setQueueSizeLimit($limit)
     {
         $this->_queueSizeLimit = $limit;
+        return $this;
+    }
+
+    public function setFollowLinks($v)
+    {
+        $this->_followLinks = $v;
         return $this;
     }
 

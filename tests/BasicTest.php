@@ -8,6 +8,7 @@ use Kwf\FileWatcher\Backend\Watchmedo as WatchmedoBackend;
 use Kwf\FileWatcher\Backend\Inotifywait as InotifywaitBackend;
 
 use Symfony\Component\Process\PhpProcess;
+use Symfony\Component\Filesystem\Filesystem;
 
 class BasicTest extends PHPUnit_Framework_TestCase
 {
@@ -25,14 +26,9 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
     private function _rmTestFiles()
     {
-        $dirname = __DIR__.'/test';
-        if (!file_exists($dirname)) {
-            return false;
-        }
-        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dirname, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $path ) {
-            $path->isDir() ? rmdir($path->getPathname()) : unlink($path->getRealPath());
-        }
-        return rmdir($dirname);
+        $fs = new Filesystem();
+        $fs->remove(__DIR__.'/test');
+        $fs->remove(__DIR__.'/test2');
     }
 
     public function backends()
@@ -178,5 +174,40 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($process->isSuccessful());
 
         $this->assertEquals(count($gotEvents), 1);
+    }
+
+    /**
+    * @medium
+    * @dataProvider backends
+    */
+    public function testLinks($backend)
+    {
+        if (!$backend->isAvailable()) $this->markTestSkipped();
+        $f2 = __DIR__.'/test2/';
+        mkdir($f2);
+        $f = __DIR__.'/test/';
+        symlink('../test2/', $f.'l');
+
+        mkdir($f.'d');
+        symlink('d', $f.'l2');
+
+        sleep(1);
+        $php = "<?php sleep(2); file_put_contents('{$f2}bar.txt', 'x');";
+        $process = new PhpProcess($php);
+        $process->start();
+
+        $gotEvents = array();
+        $backend->setPath(__DIR__.'/test');
+        $backend->setFollowLinks(true);
+        $backend->addListener(CreateEvent::NAME, function(CreateEvent $e) use (&$gotEvents, $backend) {
+            $gotEvents[] = $e->filename;
+            $backend->stop();
+        });
+        $backend->start();
+
+        $process->wait();
+        $this->assertTrue($process->isSuccessful());
+
+        $this->assertEquals($gotEvents, array(__DIR__.'/test2/bar.txt'));
     }
 }

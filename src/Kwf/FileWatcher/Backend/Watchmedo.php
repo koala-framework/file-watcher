@@ -4,6 +4,7 @@ use Kwf\FileWatcher\Event\Delete as DeleteEvent;
 use Kwf\FileWatcher\Event\Create as CreateEvent;
 use Kwf\FileWatcher\Event\Modify as ModifyEvent;
 use Kwf\FileWatcher\Event\Move as MoveEvent;
+use Kwf\FileWatcher\Helper\Links as LinksHelper;
 
 class Watchmedo extends ChildProcessAbstract
 {
@@ -22,7 +23,14 @@ class Watchmedo extends ChildProcessAbstract
         }
         $cmd = "watchmedo log --recursive --ignore-directories ";
         if ($exclude) $cmd .= "--ignore-patterns ".escapeshellarg(implode(';', $exclude)).' ';
-        $cmd .= implode(' ', $this->_paths);
+
+
+        //inotifywait doesn't recurse into symlinks
+        //so we add all symlinks to $paths
+        $paths = LinksHelper::followLinks($this->_paths, $this->_excludePatterns);
+
+
+        $cmd .= implode(' ', $paths);
         if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
             //disble output bufferering
             $cmd = "PYTHONUNBUFFERED=1 $cmd";

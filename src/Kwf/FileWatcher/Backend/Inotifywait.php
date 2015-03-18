@@ -4,6 +4,7 @@ use Kwf\FileWatcher\Event\Delete as DeleteEvent;
 use Kwf\FileWatcher\Event\Create as CreateEvent;
 use Kwf\FileWatcher\Event\Modify as ModifyEvent;
 use Kwf\FileWatcher\Event\Move as MoveEvent;
+use Kwf\FileWatcher\Helper\Links as LinksHelper;
 
 class Inotifywait extends ChildProcessAbstract
 {
@@ -37,7 +38,12 @@ class Inotifywait extends ChildProcessAbstract
         $excludeRegEx = implode('|', $excludeRegEx);
         $cmd = "inotifywait -e modify -e create -e delete -e move -e moved_to -e moved_from -e attrib -r --monitor ";
         if ($excludeRegEx) $cmd .= "--exclude '$excludeRegEx' ";
-        $cmd .= implode(' ', $this->_paths);
+
+        //inotifywait doesn't recurse into symlinks
+        //so we add all symlinks to $paths
+        $paths = LinksHelper::followLinks($this->_paths, $this->_excludePatterns);
+
+        $cmd .= implode(' ', $paths);
         return $cmd;
     }
 

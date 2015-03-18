@@ -57,6 +57,7 @@ class Poll extends BackendAbstract
         foreach ($this->_paths as $p) {
             $finder->in($p);
         }
+        if ($this->_followLinks) $finder->followLinks();
         $files = array();
         foreach ($finder as $f) {
             $files[$f->getRealpath()] = array(

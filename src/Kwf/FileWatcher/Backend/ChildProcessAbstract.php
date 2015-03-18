@@ -29,10 +29,11 @@ abstract class ChildProcessAbstract extends BackendAbstract
             if ($lastChange && $lastChange+($bufferUsecs/1000000) < microtime(true)) {
                 $eventsQueue = array_unique($eventsQueue);
                 $events = array();
+
                 foreach ($eventsQueue as $k=>$line) {
                     $e = $this->_getEventFromLine($line);
                     if ($e) {
-                        $events[]= $e;
+                        $events[] = $e;
                     }
                 }
 
@@ -73,7 +74,7 @@ abstract class ChildProcessAbstract extends BackendAbstract
         $eventsQueue = array_values($eventsQueue);
         foreach ($eventsQueue as $k=>$event) {
             if ($event instanceof ModifyEvent && $k >= 1) {
-                if ($eventsQueue[$k]->filename == $eventsQueue[$k-1]->filename) {
+                if ($eventsQueue[$k-1] instanceof ModifyEvent && $event->filename == $eventsQueue[$k-1]->filename) {
                     unset($eventsQueue[$k-1]);
                 }
             }
