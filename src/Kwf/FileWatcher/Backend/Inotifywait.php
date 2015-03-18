@@ -73,7 +73,7 @@ class Inotifywait extends ChildProcessAbstract
             return null;
         } else if ($ev == 'MOVED_TO' || $ev == 'MOVED_TO,ISDIR') {
             if (!$prevMoveFile) {
-                throw new \Exception('MOVED_FROM event is not followed by a MOVED_TO');
+                $this->_logger->error('MOVED_FROM event is not followed by a MOVED_TO');
             }
             return new MoveEvent($prevMoveFile, $file);
         }
