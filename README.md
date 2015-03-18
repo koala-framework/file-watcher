@@ -27,8 +27,3 @@ Install using composer:
         var_dump($e->filename);
     });
     $watcher->start();
-
-### TODO
-
-- [ ] error handling when child process fails
-- [ ] new backend: some nodejs based implementation
