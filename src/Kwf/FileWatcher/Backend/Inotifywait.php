@@ -52,30 +52,30 @@ class Inotifywait extends ChildProcessAbstract
 
     protected function _getEventFromLine($line)
     {
-        if (!preg_match('#^([^ ]+) ([A-Z,_]+) ([^ ]+)$#', trim($line), $m)) {
+        if (!preg_match('#^([^ ]+) ([A-Z,_]+) ?([^ ]+)?$#', trim($line), $m)) {
             $this->_logger->error("unknown event: $line");
             return null;
         }
         $ev = $m[2];
-        $file = $m[1].$m[3];
+        $file = $m[1].(isset($m[3]) ? $m[3] : '');
 
         $prevMoveFile = $this->_previousMoveFromFile;
         $this->_previousMoveFromFile = null;
 
-        if ($ev == 'MODIFY' || $ev == 'ATTRIB') {
+        if ($ev == 'MODIFY' || $ev == 'ATTRIB' || $ev == 'ATTRIB,ISDIR') {
             return new ModifyEvent($file);
-        } else if ($ev == 'CREATE') {
+        } else if ($ev == 'CREATE' || $ev == 'CREATE,ISDIR') {
             return new CreateEvent($file);
-        } else if ($ev == 'DELETE') {
+        } else if ($ev == 'DELETE' || $ev == 'DELETE,ISDIR') {
             return new DeleteEvent($file);
-        } else if ($ev == 'MOVED_FROM') {
+        } else if ($ev == 'MOVED_FROM' || $ev == 'MOVED_FROM,ISDIR') {
             $this->_previousMoveFromFile = $file;
             return null;
-        } else if ($ev == 'MOVED_TO') {
+        } else if ($ev == 'MOVED_TO' || $ev == 'MOVED_TO,ISDIR') {
             if (!$prevMoveFile) {
                 throw new \Exception('MOVED_FROM event is not followed by a MOVED_TO');
             }
-            return new MoveEvent($file, $prevMoveFile);
+            return new MoveEvent($prevMoveFile, $file);
         }
     }
 }
