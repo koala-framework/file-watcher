@@ -39,9 +39,12 @@ class Inotifywait extends ChildProcessAbstract
         $cmd = "inotifywait -e modify -e create -e delete -e move -e moved_to -e moved_from -e attrib -r --monitor ";
         if ($excludeRegEx) $cmd .= "--exclude '$excludeRegEx' ";
 
-        //inotifywait doesn't recurse into symlinks
-        //so we add all symlinks to $paths
-        $paths = LinksHelper::followLinks($this->_paths, $this->_excludePatterns);
+        $paths = $this->_paths;
+        if ($this->_followLinks) {
+            //inotifywait doesn't recurse into symlinks
+            //so we add all symlinks to $paths
+            $paths = LinksHelper::followLinks($paths, $this->_excludePatterns);
+        }
 
         $cmd .= implode(' ', $paths);
         return $cmd;
