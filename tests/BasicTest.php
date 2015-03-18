@@ -75,6 +75,33 @@ class BasicTest extends PHPUnit_Framework_TestCase
     * @medium
     * @dataProvider backends
     */
+    public function testModifyAttribute($backend)
+    {
+        if (!$backend->isAvailable()) $this->markTestSkipped();
+        sleep(1);
+        $f = __DIR__.'/test/foo.txt';
+        $php = "<?php sleep(2); chmod('$f', 0755);";
+        $process = new PhpProcess($php);
+        $process->start();
+
+        $gotEvents = array();
+        $backend->setPath(__DIR__.'/test');
+        $backend->addListener(ModifyEvent::NAME, function(ModifyEvent $e) use (&$gotEvents, $backend) {
+            $gotEvents[] = $e->filename;
+            $backend->stop();
+        });
+        $backend->start();
+
+        $process->wait();
+        $this->assertTrue($process->isSuccessful());
+
+        $this->assertEquals($gotEvents, array(__DIR__.'/test/foo.txt'));
+    }
+
+    /**
+    * @medium
+    * @dataProvider backends
+    */
     public function testCreate($backend)
     {
         if (!$backend->isAvailable()) $this->markTestSkipped();

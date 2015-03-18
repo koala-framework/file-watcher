@@ -20,15 +20,15 @@ class Poll extends BackendAbstract
             sleep(1);
             $files = $this->_findFiles();
             $events = array();
-            foreach ($files as $file=>$mtime) {
+            foreach ($files as $file=>$fileData) {
                 if (!isset($this->_files[$file])) {
                     $events[] = new CreateEvent($file);
-                } elseif ($this->_files[$file] != $mtime) {
-                    $this->_files[$file] = $mtime;
+                } elseif ($this->_files[$file] != $fileData) {
+                    $this->_files[$file] = $fileData;
                     $events[] = new ModifyEvent($file);
                 }
             }
-            foreach ($this->_files as $file=>$mtime) {
+            foreach ($this->_files as $file=>$fileData) {
                 if (!isset($files[$file])) {
                     unset($this->_files[$file]);
                     $events[] = new DeleteEvent($file);
@@ -59,7 +59,13 @@ class Poll extends BackendAbstract
         }
         $files = array();
         foreach ($finder as $f) {
-            $files[$f->getRealpath()] = $f->getMTime();
+            $files[$f->getRealpath()] = array(
+                'mtime' => $f->getMTime(),
+                'perms' => $f->getPerms(),
+                'owner' => $f->getOwner(),
+                'group' => $f->getGroup(),
+
+            );
         }
         return $files;
     }
