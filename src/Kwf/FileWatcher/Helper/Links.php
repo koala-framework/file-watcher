@@ -9,7 +9,7 @@ class Links
         $finder = new Finder();
         $finder->directories();
         foreach ($excludePatterns as $excludePattern) {
-            $finder->notName($excludePattern);
+            $finder->notPath($excludePattern);
         }
         foreach ($paths as $p) {
             $finder->in($p);
