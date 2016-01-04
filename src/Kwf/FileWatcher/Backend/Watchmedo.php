@@ -48,7 +48,7 @@ class Watchmedo extends ChildProcessAbstract
     {
         if (!preg_match('#^on_([a-z]+)\(.*event=.*src_path=u?\'([^\']+)\'(, dest_path=u?\'([^\']+)\')?#', trim($line), $m)) {
             $this->_logger->error("unknown event: $line");
-            continue;
+            return;
         }
         $ev = $m[1];
         $file = str_replace('\\\\', '/', $m[2]); //windows
