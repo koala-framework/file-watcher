@@ -9,6 +9,11 @@ class Links
         $finder = new Finder();
         $finder->directories();
         foreach ($excludePatterns as $excludePattern) {
+            if (substr($excludePattern, 0, 1) == '/') {
+                $excludePattern = substr($excludePattern, 1);
+            }
+            $excludePattern = '/'.preg_quote($excludePattern, '/').'/';
+            $excludePattern = str_replace(preg_quote('*', '/'), '.*', $excludePattern);
             $finder->notPath($excludePattern);
         }
         foreach ($paths as $p) {
