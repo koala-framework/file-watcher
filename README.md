@@ -7,6 +7,7 @@ Supports different backends for best cross platform usage.
 ### Backends
 
 * [watchmedo](https://pythonhosted.org/watchdog/) (Cross platform pything shell utility)
+* [fswatch](http://emcrisostomo.github.io/fswatch/) (Cross-platform file change monitor with multiple backends)
 * [inotifywait](http://linux.die.net/man/1/inotifywait) (Linux shell utility)
 * [inotify](http://php.net/manual/en/book.inotify.php) (Php PECL extension)
 * Polling fallback (Slow)

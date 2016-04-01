@@ -11,6 +11,7 @@ class Watcher
     {
         $backends = array(
             new Backend\Inotifywait($paths),
+            new Backend\Fswatch($paths),
             new Backend\Watchmedo($paths),
             new Backend\Inotify($paths),
             new Backend\Poll($paths),
