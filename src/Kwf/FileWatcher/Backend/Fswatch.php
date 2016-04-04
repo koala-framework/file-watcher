@@ -33,8 +33,8 @@ class Fswatch extends ChildProcessAbstract
                 $e);
         }
         $excludeRegEx = implode('|', $excludeRegEx);
-        $cmd = "fswatch --insensitive --recursive --event-flags --latency=0.0001 --event-flag-separator=, ";
-        if ($exclude) $cmd .= "--exclude=".escapeshellarg(implode(';', $exclude)).' ';
+        $cmd = "fswatch --insensitive --recursive --event-flags --latency=0.0001 --event-flag-separator=, --extended ";
+        if ($excludeRegEx) $cmd .= "--exclude=".escapeshellarg($excludeRegEx).' ';
 
 
         $paths = $this->_paths;
@@ -48,9 +48,9 @@ class Fswatch extends ChildProcessAbstract
 
     protected function _getEventFromLine($line)
     {
-        if (!preg_match('#^(.*) ([^ ]+)(Created|Removed|Renamed|Updated),(IsFile|IsDir)$#', trim($line), $m)) {
+        if (!preg_match('#^(.*) ([^ ]*)(Created|Removed|Renamed|Updated),(IsFile|IsDir)$#', trim($line), $m)) {
             $this->_logger->error("unknown event: $line");
-            continue;
+            return;
         }
         $file = $m[1];
         $ev = $m[3];
