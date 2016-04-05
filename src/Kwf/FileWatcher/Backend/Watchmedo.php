@@ -8,7 +8,6 @@ use Kwf\FileWatcher\Helper\Links as LinksHelper;
 
 class Watchmedo extends ChildProcessAbstract
 {
-    protected $_proc;
     public function isAvailable()
     {
         exec("watchmedo --version 2>&1", $out, $ret);
