@@ -48,7 +48,7 @@ class Fswatch extends ChildProcessAbstract
 
     protected function _getEventFromLine($line)
     {
-        if (!preg_match('#^(.*) ([^ ]*)(Created|Removed|Renamed|Updated),(IsFile|IsDir)$#', trim($line), $m)) {
+        if (!preg_match('#^(.*) ([^ ]*?)(Created|Removed|Renamed|Updated)(,.+)?,(IsFile|IsDir)$#', trim($line), $m)) {
             $this->_logger->error("unknown event: $line");
             return;
         }
