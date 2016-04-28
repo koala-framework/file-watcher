@@ -55,6 +55,13 @@ class Fswatch extends ChildProcessAbstract
         $file = $m[1];
         $ev = $m[3];
 
+        //fswatch buffers create+delete sometimes to one event
+        if ($ev == 'Created' && strpos($m[4], 'Removed') !== false && !file_exists($file)) {
+            $ev = 'Removed';
+        } else if ($ev == 'Removed' && strpos($m[4], 'Created') !== false && file_exists($file)) {
+            $ev = 'Created';
+        }
+
         if ($ev == 'Updated') {
             return new ModifyEvent($file);
         } else if ($ev == 'Created') {
