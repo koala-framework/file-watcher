@@ -48,12 +48,18 @@ class Fswatch extends ChildProcessAbstract
 
     protected function _getEventFromLine($line)
     {
-        if (!preg_match('#^(.*) ([^ ]*?)(Created|Removed|Renamed|Updated)(,.+)?,(IsFile|IsDir)$#', trim($line), $m)) {
+        $ev = null;
+        if (preg_match('#^(.*) ([^ ]*?)(IsFile|IsDir)(,.+)?,(Created|Removed|Renamed|Updated)$#', trim($line), $m)) { // fswatch >= 1.16
+            $ev = $m[5];
+        } else if (preg_match('#^(.*) ([^ ]*?)(Created|Removed|Renamed|Updated)(,.+)?,(IsFile|IsDir)$#', trim($line), $m)) { // fswatch < 1.16
+            $ev = $m[3];
+        }
+
+        if ($ev === null) {
             $this->_logger->error("unknown event: $line");
             return;
         }
         $file = $m[1];
-        $ev = $m[3];
 
         //fswatch buffers create+delete sometimes to one event
         if ($ev == 'Created' && strpos($m[4], 'Removed') !== false && !file_exists($file)) {
