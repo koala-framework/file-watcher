@@ -68,7 +68,7 @@ class Fswatch extends ChildProcessAbstract
             $ev = 'Created';
         }
 
-        if ($ev == 'Updated') {
+        if ($ev == 'Updated' || $ev == 'AttributeModified') {
             return new ModifyEvent($file);
         } else if ($ev == 'Created') {
             return new CreateEvent($file);
