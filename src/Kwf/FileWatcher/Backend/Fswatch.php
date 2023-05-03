@@ -49,7 +49,7 @@ class Fswatch extends ChildProcessAbstract
     protected function _getEventFromLine($line)
     {
         $ev = null;
-        if (preg_match('#^(.*) ([^ ]*?)(IsFile|IsDir)(,.+)?,(Created|Removed|Renamed|Updated)$#', trim($line), $m)) { // fswatch >= 1.16
+        if (preg_match('#^(.*) ([^ ]*?)(IsFile|IsDir)(,.+)?,(Created|Removed|Renamed|Updated|AttributeModified)$#', trim($line), $m)) { // fswatch >= 1.16
             $ev = $m[5];
         } else if (preg_match('#^(.*) ([^ ]*?)(Created|Removed|Renamed|Updated)(,.+)?,(IsFile|IsDir)$#', trim($line), $m)) { // fswatch < 1.16
             $ev = $m[3];
@@ -68,7 +68,7 @@ class Fswatch extends ChildProcessAbstract
             $ev = 'Created';
         }
 
-        if ($ev == 'Updated') {
+        if ($ev == 'Updated' || $ev == 'AttributeModified') {
             return new ModifyEvent($file);
         } else if ($ev == 'Created') {
             return new CreateEvent($file);
